@@ -41,7 +41,7 @@ class ImageLoader(DataLoader):
 class SFingeLoader(ImageLoader):
     @staticmethod
     def _extension() -> str:
-        return ".png"
+        return ".bmp"
 
     @staticmethod
     def _file_to_id_fun(_: str, filename: str) -> Identifier:
@@ -64,9 +64,10 @@ class FVC2004Loader(ImageLoader):
     @staticmethod
     def _file_to_id_fun(filename: str) -> Identifier:
         # Pattern: <dir>/<subject_id>_<sample_id>.png
-        subject_id, impression_id = filename.split("_")
+        subject_id, finger_id, impression_id = filename.split("_")
+        subject_id= "1"+subject_id+finger_id.replace("L","8").replace("R","9")
         # We must start indexing at 0 instead of 1 to be compatible with pytorch
-        return Identifier(int(subject_id) - 1, int(impression_id) - 1)
+        return Identifier(int(subject_id), int(impression_id))
 
     @staticmethod
     def _load_image(filepath: str) -> torch.Tensor:
@@ -81,10 +82,17 @@ class MCYTOpticalLoader(ImageLoader):
 
     @staticmethod
     def _file_to_id_fun(_: str, filename: str) -> Identifier:
+        side= None
         # Pattern: <dir>/<person>_<finger>_<impression>.png
-        _, person, finger, impression = filename.split("_")
-        # 12 impressions per finger
-        subject = (10 * int(person)) + int(finger)
+        person, finger, impression = filename.split("_")
+        #check if finger is L or R
+        if "L" in finger:
+            side=0
+        else:
+            side=1
+        finger = finger.replace("L","0").replace("R","0")
+        # 5 impressions per finger
+        subject = (5 * int(person)) + int(finger) + side
         return Identifier(subject, int(impression))
 
     @staticmethod

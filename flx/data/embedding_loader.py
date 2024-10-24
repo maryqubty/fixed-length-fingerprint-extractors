@@ -23,7 +23,16 @@ class EmbeddingLoader(DataLoader):
         return self._array.shape[1]
 
     def get(self, id: Identifier) -> np.ndarray:
-        return self._array[self._id_to_idx[id]]
+        print(f"Checking for id: {id}")
+        print(f"Available ids: {list(self._id_to_idx.keys())}")
+    
+        if id not in self._id_to_idx:
+            raise ValueError(f"Identifier {id} not in the dataset")
+
+        else:
+            tmpId= self._id_to_idx[id]
+            tmpNd = self._array[tmpId]
+            return self._array[self._id_to_idx[id]]
 
     def numpy(self) -> np.ndarray:
         return self._array
